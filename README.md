@@ -199,7 +199,7 @@ Please inspect test folder of the `prism4j-languages` module for further info. I
 
 Then, if you run:
 ```bash
-./gradlew :prism4j-languages:test
+./gradlew :prism4j-test:test
 ```
 
 and all tests pass (including your newly added), then it's _safe_ to issue a pull request. **Good job!**

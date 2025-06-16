@@ -1,46 +1,31 @@
-import ix.Ix
-import org.apache.commons.io.FileUtils
-
-import java.nio.charset.StandardCharsets
-
-buildscript {
-    repositories {
-        jcenter()
-        google()
-    }
-    dependencies {
-        classpath IX_JAVA
-        classpath COMMONS_IO
-    }
+plugins{
+    id 'java-library'
 }
-
-apply plugin: 'java-library'
 
 version = VERSION_NAME
 
-sourceSets {
-    main.java.srcDirs += '../annotations'
-//    main.resources.srcDirs += 'src/main/resources'
+tasks.withType(JavaCompile).configureEach {
+    options.compilerArgs += [
+            '--add-exports', 'jdk.compiler/com.sun.tools.javac.api=ALL-UNNAMED',
+            '--add-exports', 'jdk.compiler/com.sun.tools.javac.code=ALL-UNNAMED',
+            '--add-exports', 'jdk.compiler/com.sun.tools.javac.file=ALL-UNNAMED',
+            '--add-exports', 'jdk.compiler/com.sun.tools.javac.parser=ALL-UNNAMED',
+            '--add-exports', 'jdk.compiler/com.sun.tools.javac.tree=ALL-UNNAMED',
+            '--add-exports', 'jdk.compiler/com.sun.tools.javac.util=ALL-UNNAMED',
+    ]
 }
+
 
 dependencies {
-    implementation ANNOTATIONS
-    implementation IX_JAVA
-    implementation COMMONS_IO
-    implementation GOOGLE_JAVA_FORMAT
+    implementation (project(':prism4j-annotations'))
+
+    implementation(libs.annotations)
+    implementation(libs.ixjava)
+    implementation(libs.commons.io)
+    implementation(libs.google.java.format)
 }
 
-sourceCompatibility = JavaVersion.VERSION_1_8
-targetCompatibility = JavaVersion.VERSION_1_8
-
-if (project.hasProperty('release')) {
-    if (project.hasProperty('local')) {
-        ext.RELEASE_REPOSITORY_URL = LOCAL_MAVEN_URL
-        ext.SNAPSHOT_REPOSITORY_URL = LOCAL_MAVEN_URL
-    }
-    apply from: 'https://raw.githubusercontent.com/noties/gradle-mvn-push/master/gradle-mvn-push-jar.gradle'
-}
-
-afterEvaluate {
-    
+java {
+    targetCompatibility = rootProject.ext.get("target_java_version")
+    sourceCompatibility = rootProject.ext.get("compatible_java_version")
 }

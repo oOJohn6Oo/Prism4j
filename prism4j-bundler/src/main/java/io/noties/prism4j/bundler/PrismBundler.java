@@ -4,19 +4,12 @@ import com.google.googlejavaformat.java.Formatter;
 import com.google.googlejavaformat.java.FormatterException;
 import com.google.googlejavaformat.java.JavaFormatterOptions;
 
-import com.google.googlejavaformat.java.RemoveUnusedImports;
 import org.apache.commons.io.IOUtils;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.Writer;
-import java.net.URL;
-import java.net.URLConnection;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -129,7 +122,7 @@ public class PrismBundler extends AbstractProcessor {
 
         final Map<String, LanguageInfo> languages = prepareLanguages(bundle);
 
-        if (languages.size() == 0) {
+        if (languages.isEmpty()) {
             messager.printMessage(ERROR, "No languages are specified to be included", element);
             throw new RuntimeException("No languages are specified to be included");
         }
@@ -252,6 +245,7 @@ public class PrismBundler extends AbstractProcessor {
         try {
             source = IOUtils.resourceToString(languageSourceFileName(name), StandardCharsets.UTF_8, PrismBundler.class.getClassLoader());
         } catch (IOException e) {
+            e.printStackTrace();
             throw new RuntimeException(String.format(Locale.US, "Unable to read language `%1$s` " +
                     "source file. Either it is not defined yet or it was referenced as an alias " +
                     "when specifying extend clause", name), e);

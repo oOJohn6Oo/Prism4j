@@ -1,14 +1,9 @@
 plugins{
     id 'java-library'
 }
-version = VERSION_NAME
+version = "1.0.0"
 
 java {
     targetCompatibility = rootProject.ext.get("target_java_version")
     sourceCompatibility = rootProject.ext.get("compatible_java_version")
-}
-
-dependencies {
-    api(project(":prism4j-annotations"))
-    implementation(libs.annotations)
 }

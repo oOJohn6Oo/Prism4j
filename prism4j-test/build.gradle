@@ -1,0 +1,92 @@
+import ix.Ix
+import org.apache.commons.io.FileUtils
+import java.nio.charset.StandardCharsets
+
+buildscript {
+    dependencies {
+        classpath (libs.ixjava)
+        classpath (libs.commons.io)
+    }
+}
+plugins{
+    id 'java-library'
+}
+
+sourceSets {
+    main.java.srcDirs += "../prism4j-languages/"
+    test.java.srcDirs += "./build/src-gen/"
+}
+
+dependencies {
+    implementation(project(":prism4j"))
+    implementation(libs.annotations)
+
+    testAnnotationProcessor(project(":prism4j-bundler"))
+    testAnnotationProcessor(project(":prism4j-annotations"))
+    testImplementation(project(":prism4j"))
+    testImplementation(libs.junit)
+    testImplementation(libs.commons.io)
+    testImplementation(libs.ixjava)
+    testImplementation(libs.gson)
+    testImplementation(libs.json.unit)
+    testImplementation(libs.annotations)
+}
+
+java {
+    targetCompatibility = rootProject.ext.get("target_java_version")
+    sourceCompatibility = rootProject.ext.get("compatible_java_version")
+}
+
+afterEvaluate{
+
+    final def root = file('./build/src-gen/io/noties/prism4j-languages/')
+    if (!root.exists()) {
+        FileUtils.forceMkdir(root)
+    } else {
+        // let's clean this directory each time
+        FileUtils.cleanDirectory(root)
+    }
+
+    final def template = {
+        FileUtils.readFileToString(file('./src/Test.java.template'), StandardCharsets.UTF_8)
+    }.memoize()
+
+    final def createClassName = { "Test_${it.join('_').replaceAll('-', '_')}" }
+
+    final def createInclude = {
+        "{${Ix.fromArray(it).map { "\"$it\"" }.join(',')}}"
+    }
+
+    final def createGrammarLocator = { "GrammarLocator_${it.join('_').replaceAll('-', '_')}" }
+
+    final def createSource = { include, grammarLocator, className, folderName, rootGrammar  ->
+        template()
+                .replaceAll("\\{\\{include}}", include)
+                .replaceAll("\\{\\{grammar-locator}}", grammarLocator)
+                .replaceAll("\\{\\{class-name}}", className)
+                .replaceAll("\\{\\{folder-name}}", folderName)
+                .replaceAll("\\{\\{root-grammar}}", rootGrammar)
+    }
+
+    Ix.fromArray(file('./src/test/resources/languages/').listFiles())
+            .filter { it.isDirectory() }
+            .map { new Tuple2<File, String[]>(it, it.name.split('!?\\+')) }
+            .forEach {
+                final def className = createClassName(it.v2)
+                final def file = new File((File) root, className + '.java')
+                if (!file.createNewFile()) {
+                    throw new IOException("Cannot create a file at path: ${file.path}")
+                }
+                FileUtils.writeStringToFile(
+                        file,
+                        createSource(
+                                createInclude(it.v2),
+                                createGrammarLocator(it.v2),
+                                className,
+                                it.v1.name,
+                                it.v2[0]
+                        ),
+                        StandardCharsets.UTF_8
+                )
+            }
+}

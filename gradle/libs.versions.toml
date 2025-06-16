@@ -1,0 +1,19 @@
+[versions]
+annotations = "26.0.2"
+ixjava = "1.0.0"
+commons-io = "2.19.0"
+
+google-java-format = "1.27.0"
+gson = "2.13.1"
+json-unit = "4.1.1"
+junit = "4.13.2"
+
+[libraries]
+annotations = { module = "org.jetbrains:annotations", version.ref = "annotations" }
+ixjava = { module = "com.github.akarnokd:ixjava", version.ref = "ixjava" }
+commons-io = { module = "commons-io:commons-io", version.ref = "commons-io" }
+google-java-format = { module = "com.google.googlejavaformat:google-java-format", version.ref = "google-java-format" }
+gson = { module = "com.google.code.gson:gson", version.ref = "gson" }
+#test
+json-unit = { module = "net.javacrumbs.json-unit:json-unit", version.ref = "json-unit" }
+junit = { module = "junit:junit", version.ref = "junit" }
