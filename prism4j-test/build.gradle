@@ -1,10 +1,9 @@
-import ix.Ix
 import org.apache.commons.io.FileUtils
 import java.nio.charset.StandardCharsets
+import java.util.stream.Collectors;
 
 buildscript {
     dependencies {
-        classpath (libs.ixjava)
         classpath (libs.commons.io)
     }
 }
@@ -54,7 +53,8 @@ afterEvaluate{
     final def createClassName = { "Test_${it.join('_').replaceAll('-', '_')}" }
 
     final def createInclude = {
-        "{${Ix.fromArray(it).map { "\"$it\"" }.join(',')}}"
+        "{${Arrays.stream(it).map { "\"$it\"" }.collect(Collectors.joining(","))}}"
+//        "{${Ix.fromArray(it).map { "\"$it\"" }.join(',')}}"
     }
 
     final def createGrammarLocator = { "GrammarLocator_${it.join('_').replaceAll('-', '_')}" }
@@ -68,7 +68,7 @@ afterEvaluate{
                 .replaceAll("\\{\\{root-grammar}}", rootGrammar)
     }
 
-    Ix.fromArray(file('./src/test/resources/languages/').listFiles())
+    Arrays.stream(file('./src/test/resources/languages/').listFiles())
             .filter { it.isDirectory() }
             .map { new Tuple2<File, String[]>(it, it.name.split('!?\\+')) }
             .forEach {

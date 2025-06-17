@@ -13,6 +13,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 import javax.annotation.processing.AbstractProcessor;
 import javax.annotation.processing.Filer;
@@ -26,11 +27,11 @@ import javax.lang.model.element.TypeElement;
 import javax.lang.model.util.Elements;
 import javax.tools.JavaFileObject;
 
-import ix.Ix;
 import io.noties.prism4j.annotations.PrismBundle;
 
 import static javax.tools.Diagnostic.Kind.*;
 
+@SuppressWarnings("RegExpRedundantEscape")
 public class PrismBundler extends AbstractProcessor {
 
     private static final String LANGUAGES_PACKAGE = "io.noties.prism4j.languages";
@@ -98,7 +99,7 @@ public class PrismBundler extends AbstractProcessor {
                     }
                 }
 
-                if (languages.size() > 0) {
+                if (!languages.isEmpty()) {
                     writeLanguages(languages);
                 }
             }
@@ -192,16 +193,16 @@ public class PrismBundler extends AbstractProcessor {
     private List<String> allLanguages() {
 
         final List<String> list = listResources.listResourceFiles(PrismBundler.class, LANGUAGES_FOLDER);
-        if (list.size() == 0) {
+        if (list.isEmpty()) {
             throw new RuntimeException("Cannot obtain language files");
         }
 
-        return Ix.from(list)
+        return list.stream()
                 .map(LANGUAGE_NAME::matcher)
                 .filter(Matcher::matches)
                 .map(m -> m.group(1))
                 .map(s -> s.replace('_', '-'))
-                .toList();
+                .collect(Collectors.toList());
     }
 
     private void writeLanguages(@NotNull Set<LanguageInfo> languages) {
@@ -227,11 +228,9 @@ public class PrismBundler extends AbstractProcessor {
 
     @NotNull
     private List<String> processLanguageNames(@NotNull String[] names) {
-        return Ix.fromArray(names)
-                .filter(Objects::nonNull)
-                .filter(s -> s.length() > 0)
-                .filter(s -> s.trim().length() > 0)
-                .toList();
+        return Arrays.stream(names)
+                .filter(s -> !s.isBlank())
+                .collect(Collectors.toList());
     }
 
     private void languageInfo(@NotNull Map<String, LanguageInfo> map, @NotNull String name) {
@@ -245,7 +244,6 @@ public class PrismBundler extends AbstractProcessor {
         try {
             source = IOUtils.resourceToString(languageSourceFileName(name), StandardCharsets.UTF_8, PrismBundler.class.getClassLoader());
         } catch (IOException e) {
-            e.printStackTrace();
             throw new RuntimeException(String.format(Locale.US, "Unable to read language `%1$s` " +
                     "source file. Either it is not defined yet or it was referenced as an alias " +
                     "when specifying extend clause", name), e);
@@ -333,10 +331,11 @@ public class PrismBundler extends AbstractProcessor {
     @NotNull
     private static String createImports(@NotNull Map<String, LanguageInfo> languages) {
         final StringBuilder builder = new StringBuilder();
-        Ix.from(languages.values())
+        languages.values()
+                .stream()
                 .map(languageInfo -> languageInfo.name)
-                .orderBy(String::compareTo)
-                .foreach(s -> builder
+                .sorted(String::compareTo)
+                .forEach(s -> builder
                         .append("import ")
                         .append(LANGUAGES_PACKAGE)
                         .append(".Prism_")
@@ -352,7 +351,7 @@ public class PrismBundler extends AbstractProcessor {
         for (Map.Entry<String, LanguageInfo> entry : languages.entrySet()) {
             final List<String> aliases = entry.getValue().aliases;
             if (aliases != null
-                    && aliases.size() > 0) {
+                    && !aliases.isEmpty()) {
                 for (String alias : aliases) {
                     builder.append("case \"")
                             .append(alias)
@@ -383,19 +382,14 @@ public class PrismBundler extends AbstractProcessor {
     @NotNull
     private static String createObtainGrammar(@NotNull Map<String, LanguageInfo> languages) {
         final StringBuilder builder = new StringBuilder();
-        builder
-                .append("final Prism4j.Grammar grammar;\n")
-                .append("switch(name) {\n");
-        Ix.from(languages.keySet())
-                .orderBy(String::compareTo)
-                .foreach(s -> builder.append("case \"")
-                        .append(s)
-                        .append("\":\n")
-                        .append("grammar = Prism_")
-                        .append(javaValidName(s))
-                        .append(".create(prism4j);\nbreak;\n"));
-        builder.append("default:\ngrammar = null;\n}")
-                .append("return grammar;");
+        builder.append("final Prism4j.Grammar grammar;\n").append("switch(name) {\n");
+        languages.keySet().stream().sorted(String::compareTo).forEach(s -> builder.append("case \"")
+                .append(s)
+                .append("\":\n")
+                .append("grammar = Prism_")
+                .append(javaValidName(s))
+                .append(".create(prism4j);\nbreak;\n"));
+        builder.append("default:\ngrammar = null;\n}").append("return grammar;");
         return builder.toString();
     }
 
@@ -412,7 +406,7 @@ public class PrismBundler extends AbstractProcessor {
             modify = info.modify;
 
             if (modify != null
-                    && modify.size() > 0) {
+                    && !modify.isEmpty()) {
 
                 for (String name : modify) {
                     map.computeIfAbsent(name, k -> new ArrayList<>(3)).add(info.name);
@@ -420,7 +414,7 @@ public class PrismBundler extends AbstractProcessor {
             }
         }
 
-        if (map.size() == 0) {
+        if (map.isEmpty()) {
             return "";
         }
 
