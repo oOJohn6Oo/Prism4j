@@ -3,6 +3,23 @@
 Simplified Java clone of [prism-js](https://github.com/PrismJS/prism). No rendering, no themes,
 no hooks, no plugins. But still _a_ language parsing. Primary aim of this library is to provide a _tokenization_ strategy of arbitrary syntaxes for later processing. Works on Android (great with [Markwon](https://github.com/noties/Markwon) - markdown display library). 
 
+## Changes
+
+* Resolve RELEASE_8 warning
+* Upgrade to the latest gradle Version
+* Remove `ix-java` and `common-io` dependencies, make `jetbrains.annotations` `compileOnly`
+
+To use this Artifact
+[![prism4j-api](https://img.shields.io/maven-central/v/io.github.oojohn6oo/prism4j-api.svg?label=prism4j-api)](https://central.sonatype.com/artifact/io.github.oojohn6oo/prism4j-api)
+```
+implementation("io.github.oojohn6oo:prism4j-api:1.0.0")
+```
+[![prism4j-api](https://img.shields.io/maven-central/v/io.github.oojohn6oo/prism4j-bundler.svg?label=prism4j-bundler)](https://central.sonatype.com/artifact/io.github.oojohn6oo/prism4j-bundler)
+```
+kapt("io.github.oojohn6oo:prism4j-bundler:1.0.0")
+```
+
+
 ## Core
 
 Core module `prism4j` is a lightweight module that comes with API (no language definitions).

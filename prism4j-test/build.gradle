@@ -3,7 +3,7 @@ import java.nio.file.Files
 import java.util.stream.Collectors;
 
 plugins{
-    id 'java-library'
+    id("java-library")
 }
 
 sourceSets {
@@ -12,16 +12,19 @@ sourceSets {
 }
 
 dependencies {
-    implementation(project(":prism4j"))
-    implementation(libs.annotations)
+    implementation(project(':prism4j-api'))
+//    compileOnly(libs.jetbrains.annotations)
+    implementation(libs.prism4j.api)
 
     testAnnotationProcessor(project(":prism4j-bundler"))
-    testImplementation(project(":prism4j-annotations"))
-    testImplementation(project(":prism4j"))
+//    testAnnotationProcessor(libs.prism4j.bundler)
+
+    testImplementation(project(':prism4j-api'))
+//    testImplementation(libs.prism4j.api)
     testImplementation(libs.junit)
     testImplementation(libs.gson)
     testImplementation(libs.json.unit)
-    testImplementation(libs.annotations)
+    testCompileOnly(libs.jetbrains.annotations)
 }
 
 java {
@@ -31,7 +34,7 @@ java {
 
 afterEvaluate{
 
-    final def root = file('./build/src-gen/io/noties/prism4j-languages/')
+    final def root = file('./build/src-gen/io/noties/prism4j/languages/')
     if (!root.exists()) {
         root.mkdirs()
     } else {

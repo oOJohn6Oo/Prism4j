@@ -8,9 +8,14 @@ json-unit = "4.1.1"
 junit = "4.13.2"
 
 [libraries]
-annotations = { module = "org.jetbrains:annotations", version.ref = "annotations" }
+jetbrains-annotations = { module = "org.jetbrains:annotations", version.ref = "annotations" }
 google-java-format = { module = "com.google.googlejavaformat:google-java-format", version.ref = "google-java-format" }
 #test
 gson = { module = "com.google.code.gson:gson", version.ref = "gson" }
 json-unit = { module = "net.javacrumbs.json-unit:json-unit", version.ref = "json-unit" }
 junit = { module = "junit:junit", version.ref = "junit" }
+
+#self
+prism4j-annotations = { module = "io.github.oojohn6oo:prism4j-annotations", version = "1.0.0" }
+prism4j-api = { module = "io.github.oojohn6oo:prism4j-api", version = "1.0.0" }
+prism4j-bundler = { module = "io.github.oojohn6oo:prism4j-bundler", version = "1.0.0" }

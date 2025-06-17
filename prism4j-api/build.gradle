@@ -7,33 +7,20 @@ plugins{
     id("com.vanniktech.maven.publish")
 }
 
-tasks.withType(JavaCompile).configureEach {
-    options.compilerArgs += [
-            '--add-exports', 'jdk.compiler/com.sun.tools.javac.api=ALL-UNNAMED',
-            '--add-exports', 'jdk.compiler/com.sun.tools.javac.code=ALL-UNNAMED',
-            '--add-exports', 'jdk.compiler/com.sun.tools.javac.file=ALL-UNNAMED',
-            '--add-exports', 'jdk.compiler/com.sun.tools.javac.parser=ALL-UNNAMED',
-            '--add-exports', 'jdk.compiler/com.sun.tools.javac.tree=ALL-UNNAMED',
-            '--add-exports', 'jdk.compiler/com.sun.tools.javac.util=ALL-UNNAMED',
-    ]
-}
-
-
-dependencies {
-    implementation(project(":prism4j-annotations"))
-//    implementation(libs.prism4j.annotations)
-
-    compileOnly(libs.jetbrains.annotations)
-    implementation(libs.google.java.format)
-}
-
 java {
     targetCompatibility = rootProject.ext.get("target_java_version")
     sourceCompatibility = rootProject.ext.get("compatible_java_version")
 }
 
+dependencies {
+    api(project(":prism4j-annotations"))
+//    api(libs.prism4j.annotations)
+    compileOnly(libs.jetbrains.annotations)
+}
+
 mavenPublishing {
-    coordinates("io.github.oojohn6oo", "prism4j-bundler", "1.0.0")
+    coordinates("io.github.oojohn6oo", "prism4j-api", "1.0.0")
+
     // the first parameter configures the -javadoc artifact, possible values:
     // - `JavadocJar.None()` don't publish this artifact
     // - `JavadocJar.Empty()` publish an emprt jar
@@ -43,8 +30,8 @@ mavenPublishing {
     publishToMavenCentral(SonatypeHost.CENTRAL_PORTAL)
     signAllPublications()
     pom {
-        name.set("Prism4J-bundler")
-        description.set("prism4j-bundler is a code generation tool that compiles Prism4j language definitions into Java classes for fast, reflection-free syntax highlighting.")
+        name.set("Prism4J-api")
+        description.set("API for Prism4J")
         url.set("https://github.com/oOJohn6Oo/Prism4j")
         licenses {
             license {
