@@ -68,7 +68,7 @@ public class PrismBundler extends AbstractProcessor {
 
     @Override
     public SourceVersion getSupportedSourceVersion() {
-        return SourceVersion.RELEASE_8;
+        return SourceVersion.latestSupported();
     }
 
     @Override
