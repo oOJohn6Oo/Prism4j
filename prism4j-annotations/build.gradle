@@ -1,9 +1,50 @@
+import com.vanniktech.maven.publish.SonatypeHost
+import com.vanniktech.maven.publish.JavaLibrary
+import com.vanniktech.maven.publish.JavadocJar
+
 plugins{
-    id 'java-library'
+    id("java-library")
+    id("com.vanniktech.maven.publish")
 }
-version = "1.0.0"
 
 java {
     targetCompatibility = rootProject.ext.get("target_java_version")
     sourceCompatibility = rootProject.ext.get("compatible_java_version")
+}
+
+mavenPublishing {
+    coordinates("io.github.oojohn6oo", "prism4j-annotations", "1.0.0")
+
+
+    // the first parameter configures the -javadoc artifact, possible values:
+    // - `JavadocJar.None()` don't publish this artifact
+    // - `JavadocJar.Empty()` publish an emprt jar
+    // - `JavadocJar.Javadoc()` to publish standard javadocs
+    // the second whether to publish a sources jar
+    configure(new JavaLibrary(new JavadocJar.Javadoc(), true))
+    publishToMavenCentral(SonatypeHost.CENTRAL_PORTAL)
+    signAllPublications()
+    pom {
+        name.set("Prism4J-annotations")
+        description.set("Annotations for Prism4J")
+        url.set("https://github.com/oOJohn6Oo/Prism4j")
+        licenses {
+            license {
+                name = "The Apache License, Version 2.0"
+                url = "http://www.apache.org/licenses/LICENSE-2.0.txt"
+            }
+        }
+        developers {
+            developer {
+                id = "oOJohn6Oo"
+                name = "John6"
+                email = "john6.lq@gmail.com"
+            }
+        }
+        scm {
+            connection.set("scm:git:git://github.com/oOJohn6Oo/Prism4j.git")
+            developerConnection.set("scm:git:ssh://github.com/oOJohn6Oo/Prism4j.git")
+            url.set("https://github.com/oOJohn6Oo/Prism4j")
+        }
+    }
 }

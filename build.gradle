@@ -1,19 +1,10 @@
-buildscript {
+buildscript{
     ext.compatible_java_version = JavaVersion.VERSION_11
     ext.target_java_version = JavaVersion.VERSION_17
-    repositories {
-        google()
-        mavenCentral()
-    }
 }
 
-allprojects {
-    repositories {
-        google()
-        mavenCentral()
-    }
-    group = GROUP
-    version = VERSION_NAME
+plugins{
+    id("com.vanniktech.maven.publish") version("0.32.0") apply(false)
 }
 
 tasks.register('clean', Delete) {

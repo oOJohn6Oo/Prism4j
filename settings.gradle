@@ -1,2 +1,18 @@
+pluginManagement {
+    repositories {
+        google()
+        mavenCentral()
+        gradlePluginPortal()
+    }
+}
+dependencyResolutionManagement {
+    repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
+    repositories {
+        mavenLocal()
+        google()
+        mavenCentral()
+    }
+}
+
 rootProject.name = 'Prism4jProject'
-include ':prism4j', ':prism4j-test', ':prism4j-bundler', ":prism4j-annotations"
+include ':prism4j-api', ':prism4j-test', ':prism4j-bundler', ":prism4j-annotations"
