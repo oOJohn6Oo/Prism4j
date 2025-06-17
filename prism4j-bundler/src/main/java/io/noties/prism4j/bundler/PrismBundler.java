@@ -4,10 +4,10 @@ import com.google.googlejavaformat.java.Formatter;
 import com.google.googlejavaformat.java.FormatterException;
 import com.google.googlejavaformat.java.JavaFormatterOptions;
 
-import org.apache.commons.io.IOUtils;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.Writer;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
@@ -242,8 +242,8 @@ public class PrismBundler extends AbstractProcessor {
         // read info
         final String source;
         try {
-            source = IOUtils.resourceToString(languageSourceFileName(name), StandardCharsets.UTF_8, PrismBundler.class.getClassLoader());
-        } catch (IOException e) {
+            source = resourceToString(languageSourceFileName(name), PrismBundler.class.getClassLoader());
+        } catch (RuntimeException e) {
             throw new RuntimeException(String.format(Locale.US, "Unable to read language `%1$s` " +
                     "source file. Either it is not defined yet or it was referenced as an alias " +
                     "when specifying extend clause", name), e);
@@ -268,8 +268,8 @@ public class PrismBundler extends AbstractProcessor {
     @NotNull
     private static String grammarLocatorTemplate() {
         try {
-            return IOUtils.resourceToString("/GrammarLocator.template.java", StandardCharsets.UTF_8);
-        } catch (IOException e) {
+            return resourceToString("/GrammarLocator.template.java");
+        } catch (RuntimeException e) {
             throw new RuntimeException(e);
         }
     }
@@ -318,7 +318,7 @@ public class PrismBundler extends AbstractProcessor {
         try {
             return formatter.formatSource(builder.toString());
         } catch (FormatterException e) {
-            System.out.printf("source: %n%s%n", builder.toString());
+            System.out.printf("source: %n%s%n", builder);
             throw new RuntimeException(e);
         }
     }
@@ -458,5 +458,29 @@ public class PrismBundler extends AbstractProcessor {
         builder.append("return set;");
 
         return builder.toString();
+    }
+
+    private static String resourceToString(String file) throws RuntimeException {
+        try (InputStream is = PrismBundler.class.getResourceAsStream(file)) {
+            assert is != null;
+            try (Scanner scanner = new Scanner(is, StandardCharsets.UTF_8)) {
+                scanner.useDelimiter("\\A");
+                return scanner.hasNext() ? scanner.next() : "";
+            }
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to load resource: " + file, e);
+        }
+    }
+
+    private static String resourceToString(String file, ClassLoader classLoader) throws RuntimeException {
+        try (InputStream is = classLoader.getResourceAsStream(file)) {
+            assert is != null;
+            try (Scanner scanner = new Scanner(is, StandardCharsets.UTF_8)) {
+                scanner.useDelimiter("\\A");
+                return scanner.hasNext() ? scanner.next() : "";
+            }
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to load resource: " + file, e);
+        }
     }
 }

@@ -1,12 +1,7 @@
-import org.apache.commons.io.FileUtils
 import java.nio.charset.StandardCharsets
+import java.nio.file.Files
 import java.util.stream.Collectors;
 
-buildscript {
-    dependencies {
-        classpath (libs.commons.io)
-    }
-}
 plugins{
     id 'java-library'
 }
@@ -21,11 +16,9 @@ dependencies {
     implementation(libs.annotations)
 
     testAnnotationProcessor(project(":prism4j-bundler"))
-    testAnnotationProcessor(project(":prism4j-annotations"))
+    testImplementation(project(":prism4j-annotations"))
     testImplementation(project(":prism4j"))
     testImplementation(libs.junit)
-    testImplementation(libs.commons.io)
-    testImplementation(libs.ixjava)
     testImplementation(libs.gson)
     testImplementation(libs.json.unit)
     testImplementation(libs.annotations)
@@ -40,21 +33,21 @@ afterEvaluate{
 
     final def root = file('./build/src-gen/io/noties/prism4j-languages/')
     if (!root.exists()) {
-        FileUtils.forceMkdir(root)
+        root.mkdirs()
     } else {
         // let's clean this directory each time
-        FileUtils.cleanDirectory(root)
+        root.deleteDir()
+        root.mkdirs()
     }
 
     final def template = {
-        FileUtils.readFileToString(file('./src/Test.java.template'), StandardCharsets.UTF_8)
+        Files.readString(file("./src/Test.java.template").toPath(), StandardCharsets.UTF_8)
     }.memoize()
 
     final def createClassName = { "Test_${it.join('_').replaceAll('-', '_')}" }
 
     final def createInclude = {
         "{${Arrays.stream(it).map { "\"$it\"" }.collect(Collectors.joining(","))}}"
-//        "{${Ix.fromArray(it).map { "\"$it\"" }.join(',')}}"
     }
 
     final def createGrammarLocator = { "GrammarLocator_${it.join('_').replaceAll('-', '_')}" }
@@ -77,15 +70,13 @@ afterEvaluate{
                 if (!file.createNewFile()) {
                     throw new IOException("Cannot create a file at path: ${file.path}")
                 }
-                FileUtils.writeStringToFile(
-                        file,
-                        createSource(
-                                createInclude(it.v2),
-                                createGrammarLocator(it.v2),
-                                className,
-                                it.v1.name,
-                                it.v2[0]
-                        ),
+                Files.writeString(file.toPath(), createSource(
+                        createInclude(it.v2),
+                        createGrammarLocator(it.v2),
+                        className,
+                        it.v1.name,
+                        it.v2[0]
+                ),
                         StandardCharsets.UTF_8
                 )
             }

@@ -3,17 +3,18 @@ package io.noties.prism4j;
 import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 
-import org.apache.commons.io.IOUtils;
 import org.jetbrains.annotations.NotNull;
+import org.junit.Assert;
 
-import java.io.IOException;
+import java.io.BufferedReader;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
-
-import ix.Ix;
+import java.util.Scanner;
+import java.util.stream.Collectors;
 
 import static net.javacrumbs.jsonunit.JsonAssert.assertJsonEquals;
 
@@ -27,14 +28,16 @@ public abstract class TestUtils {
     public static Collection<Object> testFiles(@NotNull String lang) {
 
         final String folder = "languages/" + lang + "/";
-
-        try (InputStream in = TestUtils.class.getClassLoader().getResourceAsStream(folder)) {
-            assert in != null;
-            return Collections.singleton(Ix.from(IOUtils.readLines(in, StandardCharsets.UTF_8))
+        InputStream inputStream = TestUtils.class.getClassLoader().getResourceAsStream(folder);
+        Assert.assertNotNull(inputStream);
+        try (BufferedReader br = new BufferedReader(
+                new InputStreamReader(inputStream, StandardCharsets.UTF_8)
+        )) {
+            return Collections.singleton(br.lines()
                     .filter(s -> s.endsWith(".test"))
                     .map(s -> folder + s)
-                    .toList());
-        } catch (IOException e) {
+                    .collect(Collectors.toList()));
+        } catch (Exception e) {
             throw new RuntimeException(e);
         }
     }
@@ -57,7 +60,7 @@ public abstract class TestUtils {
 
         final String raw;
         try {
-            raw = IOUtils.resourceToString(file, StandardCharsets.UTF_8, TestUtils.class.getClassLoader());
+            raw = resourceToString(file);
         } catch (Throwable t) {
             throw new RuntimeException(t);
         }
@@ -117,6 +120,19 @@ public abstract class TestUtils {
             }
         }
         return array;
+    }
+
+    private static String resourceToString(String file) {
+        ClassLoader classLoader = TestUtils.class.getClassLoader();
+        try (InputStream is = classLoader.getResourceAsStream(file)) {
+            assert is != null;
+            try (Scanner scanner = new Scanner(is, StandardCharsets.UTF_8)) {
+                scanner.useDelimiter("\\A");
+                return scanner.hasNext() ? scanner.next() : "";
+            }
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to load resource: " + file, e);
+        }
     }
 
     private TestUtils() {

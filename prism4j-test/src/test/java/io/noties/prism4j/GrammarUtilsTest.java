@@ -4,9 +4,6 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
-import ix.Ix;
-import ix.IxConsumer;
-import ix.IxFunction;
 import io.noties.prism4j.annotations.PrismBundle;
 
 @PrismBundle(includeAll = true, grammarLocatorClassName = ".GrammarLocatorGrammarUtils")
@@ -24,21 +21,14 @@ public class GrammarUtilsTest {
     @Test
     public void clone_grammar() {
         Assert.assertNotNull(grammarLocator.languages());
-        Ix.from(grammarLocator.languages())
-                .orderBy(new IxFunction<String, String>() {
-                    @Override
-                    public String apply(String s) {
-                        return s;
-                    }
-                })
-                .foreach(new IxConsumer<String>() {
-                    @Override
-                    public void accept(String s) {
-                        final Prism4j.Grammar grammar = prism4j.grammar(s);
-                        if (grammar != null) {
-                            System.err.printf("cloning language: %s%n", s);
-                            GrammarUtils.clone(grammar);
-                        }
+        grammarLocator.languages()
+                        .stream()
+                .sorted()
+                .forEach(s -> {
+                    final Prism4j.Grammar grammar = prism4j.grammar(s);
+                    if (grammar != null) {
+                        System.err.printf("cloning language: %s%n", s);
+                        GrammarUtils.clone(grammar);
                     }
                 });
 
